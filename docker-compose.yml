@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 3s
+      retries: 10
+  api:
+    build: .
+    ports: ['8000:8000']
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/products
+      JWT_SECRET: 6cf2d6b80c7f57f834a762a5225931c2f147214df405ad6069b5de6737f1ec15
+      JWT_REFRESH_SECRET: e46e623723c9837cdacb4d6c0cfb35b7474732cd11109ab0329581fe3471258b
+    depends_on:
+      db: { condition: service_healthy }
+volumes:
+  pgdata:

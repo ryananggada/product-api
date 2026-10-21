@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info: { title: Product API, version: 1.0.0 }
+servers: [{ url: http://localhost:3000 }]
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                { username: { type: string }, password: { type: string } }
+      responses:
+        '200': { description: Returns authentication_token and refresh_token }
+        '401': { description: Invalid credentials }
+  /api/products:
+    get:
+      tags: [Products]
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses: { '200': { description: Paginated product list } }
+    post:
+      tags: [Products]
+      security: [{ bearerAuth: [] }]
+      responses:
+        {
+          '201': { description: Created },
+          '400': { description: Validation error },
+          '429': { description: Rate limited },
+        }
